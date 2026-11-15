@@ -1,5 +1,6 @@
 import express from "express";
 import  AuthService  from "./auth.service";
+import { responseFormatter } from "../../middleware/response.middleware.js";
 const Router=express.Router;
 
 const router=Router({
@@ -9,9 +10,17 @@ const router=Router({
 });
 
 
-router.post("/signup",async(req:express.Request,res:express.Response,next:express.NextFunction)=>{
-    const data=await AuthService.signup(req.body)
-    res.status(201).json({data})
-})
+router.post("/signup",
+    responseFormatter(
+        async(
+            req:express.Request,
+            res:express.Response,
+            next:express.NextFunction
+    )=>{
+        const data=await AuthService.signup(req.body)
+        return {status:201,message:true,data,extra:"user signup successfully"}
+    }
+))
+
 
 export default router;
