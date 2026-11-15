@@ -8,7 +8,8 @@ export interface Iuser{
     email:string,
     password:string,
     role:RoleEnum,
-    gender:GenderEnum
+    gender:GenderEnum,
+    phone:string
 }
 
 const userSchema=new mongoose.Schema<Iuser>({
@@ -34,6 +35,10 @@ const userSchema=new mongoose.Schema<Iuser>({
     age:{
         type:Number,
         required:true
+    },
+    phone:{
+        type:String,
+        required:false
     },
     password:{
         type:String,

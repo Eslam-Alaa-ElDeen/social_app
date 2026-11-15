@@ -9,44 +9,44 @@ export class AppException extends Error{
 }
 
 export class BadRequestException extends AppException{
-    constructor(message:string,cause:unknown){
-        super(message="Bad Request",400,cause)
+    constructor(message:string="Bad Request",cause?:unknown){
+        super(message,400,cause)
     }
 }
 
 export class NotFoundException extends AppException{
-    constructor(message:string,cause:unknown){
-        super(message="Not Found",404,cause)
+    constructor(message:string="Not Found",cause?:unknown){
+        super(message,404)
     }
 }
 
 export class UnauthorizedException extends AppException{
-    constructor(message:string,cause:unknown){
-        super(message="Unauthorized",401,cause)
+    constructor(message:string="Unauthorized",cause?:unknown){
+        super(message,401,cause)
     }
 }
 
 export class ForbiddenException extends AppException{
-    constructor(message:string,cause:unknown){
-        super(message="Forbidden",403,cause)
+    constructor(message:string="Forbidden",cause?:unknown){
+        super(message,403,cause)
     }
 }
 
 export class ConflictException extends AppException{
-    constructor(message:string,cause:unknown){
-        super(message="Conflict",409,cause)
+    constructor(message:string="Conflict",cause:unknown){
+        super(message,409,cause)
     }
 }
 
 export class InternalServerErrorException extends AppException{
-    constructor(message:string,cause:unknown){
-        super(message="Internal Server Error",500,cause)
+    constructor(message:string="Internal Server Error",cause?:unknown){
+        super(message,500,cause)
     }
 }
 
 export class TooManyRequestsException extends AppException{
-    constructor(message:string,cause:unknown){
-        super(message="Too Many Requests",429,cause)
+    constructor(message:string="Too Many Requests",cause?:unknown){
+        super(message,429,cause)
     }
 }
 

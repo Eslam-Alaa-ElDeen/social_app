@@ -1,6 +1,8 @@
 import express from "express";
 import  AuthService  from "./auth.service";
 import { responseFormatter } from "../../middleware/response.middleware.js";
+import { Validation } from "../../middleware/validation.middleware.js";
+import { signupSchema } from "./auth.validation.js";
 const Router=express.Router;
 
 const router=Router({
@@ -11,6 +13,7 @@ const router=Router({
 
 
 router.post("/signup",
+    Validation(signupSchema),
     responseFormatter(
         async(
             req:express.Request,

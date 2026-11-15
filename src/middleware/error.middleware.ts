@@ -9,8 +9,8 @@ export const globalError=(err:Ierror,req:Request,res:Response,next:NextFunction)
     .status(status)
     .json({
         err_message: err.message,
-        err,
         cause: err.cause,
+        err,
         stack: err.stack,
     });
 }

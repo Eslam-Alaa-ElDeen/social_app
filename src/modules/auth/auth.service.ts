@@ -6,7 +6,7 @@ class AuthService{
     constructor(){}
 
     signup =async(body:Iuser)=>{
-        const{age,email,fName,gender,lName,password}=body
+        const{age,email,fName,gender,lName,password,phone}=body
 
         let user= await userModel.findOne({email}as any)
 
@@ -15,7 +15,7 @@ class AuthService{
         }
 
         user=await userModel.create({
-            age,email,fName,lName,password,gender
+            age,email,fName,lName,password,gender,phone
         })
 
         return {user,message:"done on signup"};
