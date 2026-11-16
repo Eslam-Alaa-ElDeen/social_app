@@ -5,8 +5,9 @@ import{rateLimit}from "express-rate-limit"
 import { globalError } from './middleware/error.middleware';
 import { authRouter } from './modules/index';
 import { AppException } from './common/exception';
+import {PORT } from './config/config.service.js';
 const app:express.Application=express()
-const port:number=3000;
+const port:number=PORT||9000;
 
 const limiter=rateLimit({
     windowMs:60*10*1000,
