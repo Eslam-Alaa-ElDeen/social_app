@@ -1,11 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express'
-import { connectionDB } from './DB/connection.db.js';
+import { connectionDB } from './DB/connection.db';
 import cors from "cors"
 import{rateLimit}from "express-rate-limit"
 import { globalError } from './middleware/error.middleware';
 import { authRouter } from './modules/index';
 import { AppException } from './common/exception';
-import {PORT } from './config/config.service.js';
+import {PORT } from './config/config.service';
+import { RedisInstance } from './DB/redis.connection';
 const app:express.Application=express()
 const port:number=PORT||9000;
 
@@ -20,8 +21,8 @@ const limiter=rateLimit({
 })
 export const bootstrap=async()=>{
     app.use(express.json(),cors(),limiter)
-    
     await connectionDB()
+    await RedisInstance.connect()
 
     app.use("/auth",authRouter)
 
