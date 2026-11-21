@@ -18,7 +18,6 @@ const limiter=rateLimit({
         })
     }
 })
-
 export const bootstrap=async()=>{
     app.use(express.json(),cors(),limiter)
     

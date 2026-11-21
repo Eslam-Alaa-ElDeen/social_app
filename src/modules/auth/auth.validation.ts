@@ -10,6 +10,12 @@ export const signupSchema={
         age:generalRules.age.optional(),
         gender:generalRules.gender.optional(),
         password:generalRules.password,
+        cPassword:generalRules.cPassword,
         phone:generalRules.phone.optional()
+    }).refine((v)=>{
+        return v.password === v.cPassword
+    },{
+        message:"password and confirm password must be the same",
+        path:["cPassword"]
     })
 }

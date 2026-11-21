@@ -41,6 +41,11 @@ export const generalRules = {
                 "Password must contain uppercase, lowercase, number, and special character"
             ),
 
+    cPassword: z
+        .string()
+        .min(8, "Confirm password must be at least 8 characters long.")
+        .max(128, "Confirm password cannot exceed 128 characters."),
+
     file: z.object({
         fieldname: z.string({ message: "File field name is required." }),
         originalname: z.string({ message: "Original file name is required." }),

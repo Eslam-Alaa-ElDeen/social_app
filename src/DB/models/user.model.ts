@@ -1,16 +1,6 @@
 import mongoose from "mongoose";
-import { GenderEnum, RoleEnum } from "../../common/utils/enum/user.enum.js";
-
-export interface Iuser{
-    fName:string,
-    lName:string,
-    age:number,
-    email:string,
-    password:string,
-    role:RoleEnum,
-    gender:GenderEnum,
-    phone:string
-}
+import { GenderEnum, RoleEnum } from "../../common/utils/enum/user.enum";
+import { Iuser } from "../../common/interface/index";
 
 const userSchema=new mongoose.Schema<Iuser>({
     fName:{
@@ -62,4 +52,4 @@ const userSchema=new mongoose.Schema<Iuser>({
     strictQuery:true
 })
 
-export const userModel=mongoose.models.User || mongoose.model("User",userSchema)
+export const userModel=mongoose.models.User || mongoose.model<Iuser>("User",userSchema)
