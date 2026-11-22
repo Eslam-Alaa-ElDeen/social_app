@@ -99,7 +99,7 @@ class RedisService{
         }
     }
 
-    deleteKey = async (key:string) => {
+    deleteKey = async (key:string|string[]) => {
         try {
             return await this.redisClient.del(key);
         } catch (error) {
@@ -108,7 +108,7 @@ class RedisService{
         }
     }
 
-    keys = async (key:string) => {
+    keys = async (key:string|string[]) => {
         try {
             return await this.redisClient.keys(`${key}*`);
         } catch (error) {

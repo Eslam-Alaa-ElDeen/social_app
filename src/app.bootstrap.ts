@@ -7,6 +7,9 @@ import { authRouter } from './modules/index';
 import { AppException } from './common/exception';
 import {PORT } from './config/config.service';
 import { RedisInstance } from './DB/redis.connection';
+import { sendEmail } from './common/utils/email/sendEmail.js';
+import { emailTemplate } from './common/utils/email/email.template.js';
+import { eventEmitterEmail } from './common/events/event.email.js';
 const app:express.Application=express()
 const port:number=PORT||9000;
 

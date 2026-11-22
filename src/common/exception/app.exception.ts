@@ -33,7 +33,7 @@ export class ForbiddenException extends AppException{
 }
 
 export class ConflictException extends AppException{
-    constructor(message:string="Conflict",cause:unknown){
+    constructor(message:string="Conflict",cause?:unknown){
         super(message,409,cause)
     }
 }

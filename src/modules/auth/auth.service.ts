@@ -1,29 +1,124 @@
-import { NextFunction, Request, Response } from "express"
-import {userModel } from "../../DB/models/user.model"
-import { ConflictException } from "../../common/exception"
-import { Iuser } from "../../common/interface"
 import { HydratedDocument } from "mongoose"
-import { UserRepo } from "../../DB/repositories/user.repo.js"
+import { BadRequestException, ConflictException, TooManyRequestsException } from "../../common/exception"
+import { Iuser } from "../../common/interface"
+import { Encrypt } from "../../common/security/encryption.security"
+import { Compare, Hash } from "../../common/security/hash.security"
+import { SALT } from "../../config/config.service"
+import { UserRepo } from "../../DB/repositories/user.repo"
+import { createOTP, otp_key, otp_key_prefix, otp_key_trails } from "../../common/utils/email/otp"
+import { RedisInstance } from "../../DB/redis.connection"
+import { eventEmitterEmail } from "../../common/events/event.email.js"
+import { ProviderEnum } from "../../common/utils/index.js"
 
 class AuthService{
-    private readonly userRepo=new UserRepo()
+    private readonly userRepo=new UserRepo();
+    private readonly cacheServise=RedisInstance;
     constructor(){}
 
-    signup =async(body:Iuser)=>{
-        const{age,email,fName,gender,lName,password,phone}=body
 
-        const user=await this.userRepo.findOne({filter:{email}})
+    async sendEmailOTP (email:string, action:string):Promise<void>{
 
-        if(user){
-            throw new ConflictException("user already exist",{"email":email})
+        const ttlExist=await this.cacheServise.ttl(otp_key(email, action))
+        if(ttlExist>1)
+            throw new ConflictException(`the old OTP is active to use ,you can resend a new OTP after ${ttlExist}`)
+
+        const trails=await this.cacheServise.getValue(otp_key_trails(email, action))
+        if(trails>=3)
+            throw new TooManyRequestsException("You have made too many requests ,you blocked for 5 min")
+
+        const otp=createOTP()
+        await this.cacheServise.setValue({
+            key:otp_key(email, action),
+            value:await Hash(otp,SALT),
+            ttl:300
+        })
+
+        const currTrails=await this.cacheServise.incr(otp_key_trails(email, action))
+        if (currTrails === 1) {
+            await this.cacheServise.expire({
+                key: otp_key_trails(email, action),
+                ttl: 300
+            });
         }
-        const account=await this.userRepo.create(
-            { data:{
-                age,email,fName,lName,password,gender,phone
-            }}
-        )
-        return account;
+
+        if (currTrails === 3) {
+            await this.cacheServise.expire({
+                key: otp_key_trails(email, action),
+                ttl: 300
+            });
+        }
+
+        eventEmitterEmail.emit("confirm_email", { email, otp });
+        return
     }
+    async signup(inputs: Iuser): Promise<Iuser> {
+        const normalizedEmail = inputs.email.toLowerCase().trim();
+
+        const existEmail = await this.userRepo.findOne({ email: normalizedEmail });
+        if (existEmail) {
+            throw new ConflictException("email already exist go to login");
+        }
+
+        const { fName, lName, password, phone, gender,age } = inputs;
+
+        const user = await this.userRepo.create({
+            data: {
+                fName,
+                lName,
+                email: normalizedEmail,
+                password: await Hash(password, SALT),
+                phone: await Encrypt(phone),
+                gender,
+                age
+            }
+        });
+
+        await this.sendEmailOTP(normalizedEmail, "ConfirmEmail");
+
+        return user;
+    }
+
+    async confirmEmail({ email, otp }: { email: string; otp: string }): Promise<void> {
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const user = await this.userRepo.findOne({
+            email: normalizedEmail,
+            provider: ProviderEnum.SYSTEM,
+            confirmEmail: { $exists: false }
+        }) as HydratedDocument<Iuser>;
+
+        if (!user) {
+            throw new BadRequestException("the user not exists or already confirmed");
+        }
+
+        const cipherOTP = await this.cacheServise.getValue(otp_key(normalizedEmail, "ConfirmEmail"));
+
+        if (!cipherOTP || !(await Compare(otp, cipherOTP))) {
+            throw new BadRequestException("OTP is wrong or expired");
+        }
+
+        const keysToDelete = await this.cacheServise.keys(`${otp_key_prefix(normalizedEmail)}*`);
+        if (keysToDelete?.length) {
+            await this.cacheServise.deleteKey(keysToDelete);
+        }
+
+        user.confirmEmail = new Date() as unknown as string;
+        await user.save();
+    }
+
+    async resendOTP({email}:{email:string}){
+        const user=await this.userRepo.findOne(
+            {
+                email,provider:ProviderEnum.SYSTEM,confirmEmail:{$exists:false}
+            }
+        )
+
+        if(!user)
+            throw new BadRequestException("the user not exists or already confirmed")
+
+        await this.sendEmailOTP(email, "ConfirmEmail")
+    }
+
     login(){
         return "done on login"
     }

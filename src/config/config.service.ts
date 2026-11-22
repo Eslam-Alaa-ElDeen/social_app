@@ -10,7 +10,7 @@ config({ path: resolve(`./src/config/.env.${NODE_ENV}`) });
 
 export const PORT: number = parseInt(process.env.PORT ?? "7000");
 export const DB_URI: string = process.env.DB_URI as string;
-export const SALT: string = process.env.SALT ?? "10";
+export const SALT: number = parseInt(process.env.SALT ??"10");
 
 export const ENCRYPTION_KEY: Buffer = Buffer.from(
     process.env.ENCRYPTION_KEY ?? "default_32_byte_encryption_key_here___",

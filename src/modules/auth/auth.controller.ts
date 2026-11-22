@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Response ,Request} from "express";
 import  AuthService  from "./auth.service";
 import { responseFormatter } from "../../middleware/response.middleware.js";
 import { Validation } from "../../middleware/validation.middleware.js";
@@ -24,6 +24,18 @@ router.post("/signup",
         return {status:201,message:true,data,extra:"user signup successfully"}
     }
 ))
+
+router.patch("/confirm_otp", responseFormatter(
+    async (req:Request, res:Response, next:NextFunction) => {
+        await AuthService.confirmEmail(req.body)
+    })
+)
+
+router.post("/resend_otp", responseFormatter(
+    async (req:Request, res:Response, next:NextFunction) => {
+        await AuthService.resendOTP(req.body)
+    })
+)
 
 
 export default router;
