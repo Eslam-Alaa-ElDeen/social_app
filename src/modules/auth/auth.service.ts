@@ -18,9 +18,9 @@ class AuthService{
             throw new ConflictException("user already exist",{"email":email})
         }
         const account=await this.userRepo.create(
-            {
+            { data:{
                 age,email,fName,lName,password,gender,phone
-            }
+            }}
         )
         return account;
     }

@@ -1,3 +1,4 @@
+import { HydratedDocument } from "mongoose";
 import { PopulateOptions } from "mongoose";
 
 export interface IFindOptions {
@@ -14,4 +15,10 @@ export interface IDataInfo {
     totalPages: number;
     page: number;
     limit: number;
+}
+
+
+export interface IPaginatedResult<T> {
+    dataInfo:IDataInfo;
+    data: HydratedDocument<T>[];
 }
