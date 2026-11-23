@@ -1,6 +1,9 @@
-import mongoose from "mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
 import { GenderEnum, RoleEnum, ProviderEnum} from "../../common/utils/enum";
 import { Iuser } from "../../common/interface/index";
+import { SALT } from "../../config/config.service";
+import { Hash } from "../../common/security/hash.security";
+import { Encrypt } from "../../common/security/encryption.security";
 
 const userSchema = new mongoose.Schema<Iuser>(
     {
@@ -59,6 +62,31 @@ const userSchema = new mongoose.Schema<Iuser>(
         strictQuery: true,
     },
 );
+
+userSchema.pre("save",async function(this:HydratedDocument< Iuser & {is_new:boolean}>){
+    this.is_new=this.isNew
+    if(this.modifiedPaths().includes("password"))
+        this.password=await Hash(this.password, SALT)
+    if(this.modifiedPaths().includes("phone"))
+        this.phone= await Encrypt(this.phone)
+})
+
+userSchema.pre(["find","findOne"],async function(){
+    const query:any=this.getQuery
+    const {paranoid,...rest}=query;
+    if(paranoid){
+        this.setQuery({...rest})
+    }else{
+        this.setQuery({...rest,isDeleted:{$exists:false}})  //paranoid :false or we don't send it
+    }
+})
+
+userSchema.post("save",async function(){
+    const that=this as HydratedDocument< Iuser & {is_new:boolean}>;
+    // authService.sendEmailOTP()
+    console.log({post:that.is_new});
+    console.log("email sent successfully");
+})
 
 export const userModel =
     mongoose.models.User || mongoose.model<Iuser>("User", userSchema);

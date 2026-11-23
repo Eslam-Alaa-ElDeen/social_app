@@ -66,8 +66,8 @@ class AuthService{
                 fName,
                 lName,
                 email: normalizedEmail,
-                password: await Hash(password, SALT),
-                phone: await Encrypt(phone),
+                password,
+                phone,
                 gender,
                 age
             }
