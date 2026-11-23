@@ -3,7 +3,7 @@ import { connectionDB } from './DB/connection.db';
 import cors from "cors"
 import{rateLimit}from "express-rate-limit"
 import { globalError } from './middleware/error.middleware';
-import { authRouter } from './modules/index';
+import { authRouter, userRouter } from './modules/index';
 import { AppException } from './common/exception';
 import {PORT } from './config/config.service';
 import { RedisInstance } from './DB/redis.connection';
@@ -28,6 +28,7 @@ export const bootstrap=async()=>{
     await RedisInstance.connect()
 
     app.use("/auth",authRouter)
+    app.use("/user",userRouter)
 
     app.listen(port,()=>{
         console.log("app is listen on port ",port);

@@ -54,7 +54,8 @@ const userSchema = new mongoose.Schema<Iuser>(
         enum: ProviderEnum,
         default: ProviderEnum.SYSTEM,
     },
-    confirmEmail:String
+    confirmEmail:String,
+    changeCredentialTime:Date
     },
     {
         timestamps: true,

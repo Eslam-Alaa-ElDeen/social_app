@@ -1,14 +1,16 @@
 import { HydratedDocument } from "mongoose"
-import { BadRequestException, ConflictException, TooManyRequestsException } from "../../common/exception"
+import { BadRequestException, ConflictException, NotFoundException, TooManyRequestsException } from "../../common/exception"
 import { Iuser } from "../../common/interface"
-import { Encrypt } from "../../common/security/encryption.security"
+import { Decrypt, Encrypt } from "../../common/security/encryption.security"
 import { Compare, Hash } from "../../common/security/hash.security"
-import { SALT } from "../../config/config.service"
+import { ACCESS_TOKEN_SIGNATURE, REFRESH_TOKEN_EXPIRES_IN, REFRESH_TOKEN_SIGNATURE, SALT } from "../../config/config.service"
 import { UserRepo } from "../../DB/repositories/user.repo"
 import { createOTP, otp_key, otp_key_prefix, otp_key_trails } from "../../common/utils/email/otp"
 import { RedisInstance } from "../../DB/redis.connection"
 import { eventEmitterEmail } from "../../common/events/event.email.js"
 import { ProviderEnum } from "../../common/utils/index.js"
+import {randomUUID}from"node:crypto"
+import { tokenService } from "../../common/service/token.service.js"
 
 class AuthService{
     private readonly userRepo=new UserRepo();
@@ -119,8 +121,24 @@ class AuthService{
         await this.sendEmailOTP(email, "ConfirmEmail")
     }
 
-    login(){
-        return "done on login"
+    async login(
+        inputs: { email: string; password: string },
+        issuer = ""
+    ): Promise<{ access_token: string; refresh_token: string }> {
+        const user = await this.userRepo.findOne({ email: inputs.email }) as HydratedDocument<Iuser> | null;
+        if (!user) {
+            throw new NotFoundException("email or password not valid");
+        }
+
+        const matchPass = await Compare(inputs.password, user.password);
+        if (!matchPass) {
+            throw new NotFoundException("email or password not valid");
+        }
+
+        return tokenService.createLoginCredentials({
+            user,
+            issuer
+        });
     }
 }
 

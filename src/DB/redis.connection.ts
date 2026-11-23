@@ -1,7 +1,7 @@
 import { createClient, RedisClientType } from "redis"
 import { REDIS_URI } from "../config/config.service.js";
 
-class RedisService{
+export class RedisService{
     private readonly redisClient:RedisClientType
     constructor(){
         this.redisClient=createClient({

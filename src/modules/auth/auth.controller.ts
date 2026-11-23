@@ -3,6 +3,8 @@ import  AuthService  from "./auth.service";
 import { responseFormatter } from "../../middleware/response.middleware.js";
 import { Validation } from "../../middleware/validation.middleware.js";
 import { signupSchema } from "./auth.validation.js";
+import { authentication } from "../../middleware/authentication.middleware.js";
+import { getIssuer, TOKEN_TYPE } from "../../common/utils/index.js";
 const Router=express.Router;
 
 const router=Router({
@@ -36,6 +38,21 @@ router.post("/resend_otp", responseFormatter(
         await AuthService.resendOTP(req.body)
     })
 )
+
+
+router.post("/login",
+    // Validation(signupSchema),
+    // authentication(TOKEN_TYPE.access),
+    responseFormatter(
+        async(
+            req:express.Request,
+            res:express.Response,
+            next:express.NextFunction
+    )=>{
+        const data=await AuthService.login(req.body,getIssuer(req))
+        return {status:201,message:true,data,extra:"user signup successfully"}
+    }
+))
 
 
 export default router;
