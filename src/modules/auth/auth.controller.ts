@@ -2,7 +2,7 @@ import express, { NextFunction, Response ,Request} from "express";
 import  AuthService  from "./auth.service";
 import { responseFormatter } from "../../middleware/response.middleware.js";
 import { Validation } from "../../middleware/validation.middleware.js";
-import { confirmOtpSchema, loginSchema, resendOtpSchema, signupSchema } from "./auth.validation.js";
+import { confirmOtpSchema, forgetPasswordSendOtpSchema, loginSchema, resendOtpSchema, signupSchema, updatePasswordVerifyOtpSchema } from "./auth.validation.js";
 import { authentication } from "../../middleware/authentication.middleware.js";
 import { getIssuer, TOKEN_TYPE } from "../../common/utils/index.js";
 const Router=express.Router;
@@ -75,6 +75,44 @@ router.post(
                 extra: result.status === 201
                     ? "user registered and logged in via gmail successfully"
                     : "user logged in via gmail successfully"
+            };
+        }
+    )
+);
+
+router.post(
+    "/forget_password_send_otp",
+    Validation(forgetPasswordSendOtpSchema),
+    responseFormatter(
+        async (
+            req: express.Request,
+            res: express.Response,
+            next: express.NextFunction
+        ) => {
+            await AuthService.forgetPasswordSendOTP(req.body);
+            return {
+                status: 200,
+                message: true,
+                extra: "otp sent successfully",
+            };
+        }
+    )
+);
+
+router.patch(
+    "/update_password",
+    Validation(updatePasswordVerifyOtpSchema),
+    responseFormatter(
+        async (
+            req: express.Request,
+            res: express.Response,
+            next: express.NextFunction
+        ) => {
+            await AuthService.updatePasswordVerifyOTP(req.body);
+            return {
+                status: 200,
+                message: true,
+                extra: "password updated successfully",
             };
         }
     )

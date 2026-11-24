@@ -37,3 +37,15 @@ export const resendOtpSchema={
         email:generalRules.email,
     })
 }
+export const forgetPasswordSendOtpSchema={
+    body:zod.object({
+        email:generalRules.email,
+    })
+}
+export const updatePasswordVerifyOtpSchema={
+    body:zod.object({
+        email:generalRules.email,
+        otp:generalRules.otp,
+        newPassword:generalRules.password
+    })
+}

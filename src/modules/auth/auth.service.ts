@@ -10,7 +10,7 @@ import { RedisInstance } from "../../DB/redis.connection"
 import { eventEmitterEmail } from "../../common/events/event.email.js"
 import { ProviderEnum } from "../../common/utils/index.js"
 import {randomUUID}from"node:crypto"
-import { tokenService } from "../../common/service/token.service.js"
+import { JwtPayloadType, tokenService } from "../../common/service/token.service.js"
 import { OAuth2Client, TokenPayload } from "google-auth-library"
 
 class AuthService{
@@ -192,6 +192,76 @@ class AuthService{
             user,
             issuer
         });
+    }
+
+    async forgetPasswordSendOTP({ email }: { email: string }) {
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const user = await this.userRepo.findOne({
+            email: normalizedEmail,
+            provider: ProviderEnum.SYSTEM,
+            confirmEmail: { $exists: true },
+        });
+
+        if (!user) {
+            throw new BadRequestException("User not exists");
+        }
+
+        await this.sendEmailOTP(normalizedEmail, "ForgotPassword");
+    }
+
+    async updatePasswordVerifyOTP({
+        email,
+        otp,
+        newPassword,
+    }: {
+        email: string;
+        otp: string;
+        newPassword: string;
+    }) {
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const user = await this.userRepo.findOne({
+            email: normalizedEmail,
+            provider: ProviderEnum.SYSTEM,
+            confirmEmail: { $exists: true },
+        });
+
+        if (!user) {
+            throw new BadRequestException("User not exists");
+        }
+
+        const cipherOTP = await this.cacheService.getValue(
+            otp_key(normalizedEmail, "ForgotPassword")
+        );
+
+        if (!cipherOTP || !(await Compare(otp, cipherOTP))) {
+            throw new BadRequestException("OTP is wrong or expired");
+        }
+
+        const doc = user as HydratedDocument<Iuser>;
+        doc.password = await Hash(newPassword, SALT);
+        doc.changeCredentialTime = new Date();
+        await doc.save();
+        const userId = doc._id.toString();
+        const payload = {
+            sub: userId,
+            user: {
+                sub: userId
+            },
+        };
+
+        const [revokeKeys, otpKeys] = await Promise.all([
+            this.cacheService.keys(
+                tokenService.userBaseRevokeTokenKey(payload)
+            ),
+            this.cacheService.keys(`${otp_key_prefix(normalizedEmail)}`),
+        ]);
+
+        const keysToDelete = [...(revokeKeys ?? []), ...(otpKeys ?? [])];
+        if (keysToDelete.length > 0) {
+            await this.cacheService.deleteKey(keysToDelete);
+        }
     }
 }
 

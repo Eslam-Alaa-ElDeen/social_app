@@ -12,8 +12,8 @@ import { Iuser } from "../interface/user.interfasce.js";
 
 export interface JwtPayloadType extends JwtPayload {
     sub: string;
-    jti: string;
-    iat: number;
+    jti?: string;
+    iat?: number;
     user?: {
         sub: string;
     };
