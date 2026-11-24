@@ -117,6 +117,10 @@ export const generalRules = {
         .refine((value) => Types.ObjectId.isValid(value), {
             message: "Enter a valid ID.",
         }),
+    otp: z
+        .string()
+        .min(6, "otp length must be 6 ")
+        .max(6, "otp length must be 6 "),
 
     userName: z
         .string()

@@ -2,7 +2,7 @@ import express, { NextFunction, Response ,Request} from "express";
 import  AuthService  from "./auth.service";
 import { responseFormatter } from "../../middleware/response.middleware.js";
 import { Validation } from "../../middleware/validation.middleware.js";
-import { signupSchema } from "./auth.validation.js";
+import { confirmOtpSchema, loginSchema, resendOtpSchema, signupSchema } from "./auth.validation.js";
 import { authentication } from "../../middleware/authentication.middleware.js";
 import { getIssuer, TOKEN_TYPE } from "../../common/utils/index.js";
 const Router=express.Router;
@@ -27,22 +27,25 @@ router.post("/signup",
     }
 ))
 
-router.patch("/confirm_otp", responseFormatter(
-    async (req:Request, res:Response, next:NextFunction) => {
-        await AuthService.confirmEmail(req.body)
+router.patch("/confirm_otp",
+    Validation(confirmOtpSchema),
+    responseFormatter(
+        async (req:Request, res:Response, next:NextFunction) => {
+            await AuthService.confirmEmail(req.body)
     })
 )
 
-router.post("/resend_otp", responseFormatter(
-    async (req:Request, res:Response, next:NextFunction) => {
-        await AuthService.resendOTP(req.body)
+router.post("/resend_otp",
+    Validation(resendOtpSchema),
+    responseFormatter(
+        async (req:Request, res:Response, next:NextFunction) => {
+            await AuthService.resendOTP(req.body)
     })
 )
 
 
 router.post("/login",
-    // Validation(signupSchema),
-    // authentication(TOKEN_TYPE.access),
+    Validation(loginSchema),
     responseFormatter(
         async(
             req:express.Request,
@@ -53,6 +56,29 @@ router.post("/login",
         return {status:201,message:true,data,extra:"user signup successfully"}
     }
 ))
+
+router.post(
+    "/login-gmail",
+    responseFormatter(
+        async (
+            req: express.Request,
+            res: express.Response,
+            next: express.NextFunction
+        ) => {
+            const issuer = getIssuer(req);
+            const result = await AuthService.signupWithGmail(req.body, issuer);
+
+            return {
+                status: result.status,
+                message: true,
+                data: result.tokens,
+                extra: result.status === 201
+                    ? "user registered and logged in via gmail successfully"
+                    : "user logged in via gmail successfully"
+            };
+        }
+    )
+);
 
 
 export default router;

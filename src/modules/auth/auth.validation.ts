@@ -19,3 +19,21 @@ export const signupSchema={
         path:["cPassword"]
     })
 }
+
+export const confirmOtpSchema={
+    body:zod.object({
+        email:generalRules.email,
+        otp:generalRules.otp,
+    })
+}
+export const loginSchema={
+    body:zod.object({
+        email:generalRules.email,
+        password:generalRules.password,
+    })
+}
+export const resendOtpSchema={
+    body:zod.object({
+        email:generalRules.email,
+    })
+}

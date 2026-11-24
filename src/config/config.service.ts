@@ -36,3 +36,9 @@ export const PROJECT_NAME: string = process.env.PROJECT_NAME as string;
 export const ALLOWED_ORIGINS: string[] = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
     : ["*"];
+
+
+export const AWS_REGION: string = process.env.AWS_REGION as string;
+export const AWS_BUCKET_NAME: string = process.env.AWS_BUCKET_NAME as string;
+export const AWS_ACCESS_KEY: string = process.env.AWS_ACCESS_KEY as string;
+export const AWS_SECRET_ACCESS_KEY: string = process.env.AWS_SECRET_ACCESS_KEY as string;

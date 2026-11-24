@@ -55,13 +55,14 @@ const userSchema = new mongoose.Schema<Iuser>(
         default: ProviderEnum.SYSTEM,
     },
     confirmEmail:String,
-    changeCredentialTime:Date
+    changeCredentialTime:Date,
+    image:String
     },
     {
         timestamps: true,
         strict: true,
         strictQuery: true,
-    },
+    }
 );
 
 userSchema.pre("save",async function(this:HydratedDocument< Iuser & {is_new:boolean}>){

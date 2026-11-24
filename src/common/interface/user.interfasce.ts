@@ -12,5 +12,6 @@ export interface Iuser {
     phone: string;
     confirmEmail: string;
     provider: ProviderEnum;
-    changeCredentialTime:Date
+    changeCredentialTime:Date;
+    image?:string
 }
