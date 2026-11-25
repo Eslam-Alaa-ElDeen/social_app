@@ -29,6 +29,8 @@ export const bootstrap=async()=>{
 
     app.use("/auth",authRouter)
     app.use("/user",userRouter)
+    app.use("/uploads",express.static("./uploads"))
+
 
     app.listen(port,()=>{
         console.log("app is listen on port ",port);

@@ -1,4 +1,5 @@
 export * from "./error.middleware"
 export * from "./response.middleware"
 export * from "./authentication.middleware"
+export * from "./multer.middleware"
 export * from "./authorization.middleware"

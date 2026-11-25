@@ -7,6 +7,8 @@ declare global {
         interface Request {
             user?: HydratedDocument<Iuser>;
             payload?: JwtPayloadType;
+            filePath?: string | undefined;
+            filesPaths?: unknown;
         }
     }
 }

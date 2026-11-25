@@ -83,6 +83,16 @@ userSchema.pre(["find","findOne"],async function(){
     }
 })
 
+userSchema.pre(["updateOne","updateMany","findOneAndUpdate"],async function(){
+    const query:any=this.getQuery
+    const {paranoid,...rest}=query;
+    if(paranoid){
+        this.setQuery({...rest})
+    }else{
+        this.setQuery({...rest,isDeleted:{$exists:false}})  //paranoid :false or we don't send it
+    }
+})
+
 userSchema.post("save",async function(){
     const that=this as HydratedDocument< Iuser & {is_new:boolean}>;
     // authService.sendEmailOTP()

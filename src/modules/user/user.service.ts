@@ -10,6 +10,7 @@ import {
 import { ACCESS_TOKEN_EXPIRES_IN } from "../../config/config.service.js";
 import { ConflictException } from "../../common/exception/app.exception.js";
 import { LogoutTypeEnum } from "../../common/utils/index.js";
+import { cloudInstance, CloudService } from "../../common/service/cloud.service.js";
 
 const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
@@ -17,6 +18,7 @@ class UserService {
     private readonly userRepo = new UserRepo();
     private readonly cacheService = RedisInstance;
     private readonly tokenService: TokenService = tokenService;
+    private readonly cloudService: CloudService = cloudInstance;
 
     constructor() {}
 
@@ -82,6 +84,23 @@ class UserService {
             }
         }
     }
+
+    async uploadProfileImage(
+        user: HydratedDocument<Iuser>,
+        file: Express.Multer.File
+    ): Promise<string> {
+        const oldImage=user.image
+        const imageUrl = await this.cloudService.uploadAsset({ file, path: "profile-images" });
+        user.image = imageUrl;
+        await user.save();
+        if(oldImage?.length)
+            await this.cloudService.deleteAssets({Keys:[oldImage]})
+        return imageUrl;
+    }
+
+    // async deleteAsset(key: string) {
+    //     await this.cloudService.deleteAsset({ Key: key });
+    // }
 }
 
 export default new UserService();
