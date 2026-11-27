@@ -42,3 +42,8 @@ export const AWS_REGION: string = process.env.AWS_REGION as string;
 export const AWS_BUCKET_NAME: string = process.env.AWS_BUCKET_NAME as string;
 export const AWS_ACCESS_KEY: string = process.env.AWS_ACCESS_KEY as string;
 export const AWS_SECRET_ACCESS_KEY: string = process.env.AWS_SECRET_ACCESS_KEY as string;
+
+export const CLOUDINARY_API_KEY: string = process.env.CLOUDINARY_API_KEY as string;
+export const CLOUDINARY_API_SECRET: string = process.env.CLOUDINARY_API_SECRET as string;
+export const CLOUDINARY_CLOUD_NAME: string = process.env.CLOUDINARY_CLOUD_NAME as string;
+

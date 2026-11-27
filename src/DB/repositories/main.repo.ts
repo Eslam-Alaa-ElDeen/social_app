@@ -88,6 +88,9 @@ export abstract class MainRepo<T> {
     findByIdAndDelete = async (ID: string):Promise<HydratedDocument<T> |undefined|null> => {
         return await this.model.findByIdAndDelete(ID);
     };
+    findOneAndDelete = async (filter:  QueryFilter<T> = {}):Promise<HydratedDocument<T> |undefined|null> => {
+        return await this.model.findOneAndDelete(filter);
+    };
 
     find = async (
         filter: QueryFilter<T> = {},

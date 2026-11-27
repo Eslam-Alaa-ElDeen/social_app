@@ -8,7 +8,7 @@ import {
     TokenService,
 } from "../../common/service/token.service.js";
 import { ACCESS_TOKEN_EXPIRES_IN } from "../../config/config.service.js";
-import { ConflictException } from "../../common/exception/app.exception.js";
+import { ConflictException, NotFoundException } from "../../common/exception/app.exception.js";
 import { LogoutTypeEnum } from "../../common/utils/index.js";
 import { cloudInstance, CloudService } from "../../common/service/cloud.service.js";
 
@@ -98,9 +98,30 @@ class UserService {
         return imageUrl;
     }
 
-    // async deleteAsset(key: string) {
-    //     await this.cloudService.deleteAsset({ Key: key });
-    // }
+    async updateProfile(user: HydratedDocument<Iuser>,body:Partial<Iuser>) {
+        user.fName=body.fName??user.fName
+        user.lName=body.lName??user.lName
+        user.phone=body.phone??user.phone
+        user.age=body.age??user.age
+
+        await user.save()
+        return{
+            fName:user.fName,
+            lName:user.lName,
+            phone:user.phone,
+            age:user.age
+        }
+    }
+    async getProfileById({id}:{id:string}) {
+        const user=await this.userRepo.findById(id)
+        if(!user)throw new NotFoundException("User not found");
+        return {
+            fName: user.fName,
+            lName: user.lName,
+            profilePicture: user.image,
+            age:user.age
+        };
+    }
 }
 
 export default new UserService();

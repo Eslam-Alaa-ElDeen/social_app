@@ -3,7 +3,7 @@ import { connectionDB } from './DB/connection.db';
 import cors from "cors"
 import{rateLimit}from "express-rate-limit"
 import { globalError } from './middleware/error.middleware';
-import { authRouter, userRouter } from './modules/index';
+import { authRouter, followRouter, userRouter } from './modules/index';
 import { AppException } from './common/exception';
 import {PORT } from './config/config.service';
 import { RedisInstance } from './DB/redis.connection';
@@ -29,6 +29,7 @@ export const bootstrap=async()=>{
 
     app.use("/auth",authRouter)
     app.use("/user",userRouter)
+    app.use("/follow",followRouter)
     app.use("/uploads",express.static("./uploads"))
 
 
