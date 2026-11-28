@@ -1,5 +1,5 @@
 import mongoose, { HydratedDocument } from "mongoose";
-import { GenderEnum, RoleEnum, ProviderEnum} from "../../common/utils/enum";
+import { GenderEnum, RoleEnum, ProviderEnum, ProfileStatus} from "../../common/utils/enum";
 import { Iuser } from "../../common/interface/index";
 import { SALT } from "../../config/config.service";
 import { Hash } from "../../common/security/hash.security";
@@ -54,9 +54,18 @@ const userSchema = new mongoose.Schema<Iuser>(
         enum: ProviderEnum,
         default: ProviderEnum.SYSTEM,
     },
+    fullName: {
+        type: String,
+        trim: true,
+    },
     confirmEmail:String,
     changeCredentialTime:Date,
-    image:String
+    image:String,
+    profileStatus:{
+        type:String,
+        enum:ProfileStatus,
+        default:ProfileStatus.public
+    }
     },
     {
         timestamps: true,
@@ -99,6 +108,12 @@ userSchema.post("save",async function(){
     console.log({post:that.is_new});
     console.log("email sent successfully");
 })
+
+userSchema.pre("save", function () {
+    if (this.isModified("fName") || this.isModified("lName")) {
+        this.fullName = `${this.fName} ${this.lName}`.trim();
+    }
+});
 
 export const userModel =
     mongoose.models.User || mongoose.model<Iuser>("User", userSchema);

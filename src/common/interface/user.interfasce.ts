@@ -1,5 +1,5 @@
 import { ProviderEnum } from "../utils/enum/db.enum.js";
-import { GenderEnum, RoleEnum } from "../utils/index.js";
+import { GenderEnum, ProfileStatus, RoleEnum } from "../utils/index.js";
 
 export interface Iuser {
     fName: string;
@@ -13,5 +13,7 @@ export interface Iuser {
     confirmEmail: string;
     provider: ProviderEnum;
     changeCredentialTime:Date;
-    image?:string
+    image?:string;
+    fullName:string;
+    profileStatus:ProfileStatus
 }

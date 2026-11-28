@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Ifollow } from "../../common/interface/follow.interface.js";
+import { FollowStatus } from "../../common/utils/enum/follow.enum.js";
 
 
 const followSchema = new mongoose.Schema<Ifollow>(
@@ -15,6 +16,11 @@ const followSchema = new mongoose.Schema<Ifollow>(
             required:true,
             index:true,
             ref:"User"
+        },
+        status:{
+            type:String,
+            enum:FollowStatus,
+            default:FollowStatus.accepted
         }
     },
     {

@@ -4,6 +4,8 @@ import mongoose, { HydratedDocument, mongo } from "mongoose";
 import { FollowRepo } from "../../DB/repositories/follow.repo.js";
 import { BadRequestException, ConflictException, UnauthorizedException } from "../../common/exception/app.exception.js";
 import { Iuser } from "../../common/interface/user.interfasce.js";
+import { ProfileStatus } from "../../common/utils/index.js";
+import { FollowStatus } from "../../common/utils/enum/follow.enum.js";
 
 
 class FollowService {
@@ -27,9 +29,9 @@ class FollowService {
         const follower=new mongoose.Types.ObjectId(followerId)
         const following=new mongoose.Types.ObjectId(followingId)
 
-        const existUsers=await this.userRepo.findById(followingId)
+        const existUser=await this.userRepo.findById(followingId)
 
-        if(!existUsers)
+        if(!existUser)
             throw new BadRequestException("following not found")
 
         const existingFollow=await this.followRepo.findOne({
@@ -46,6 +48,11 @@ class FollowService {
                 followingId:following
             }
         })
+
+        if(existUser.profileStatus==ProfileStatus.private){
+            createFollow.status=FollowStatus.pending
+            return "Follow request sent"
+        }
 
         return createFollow
     }

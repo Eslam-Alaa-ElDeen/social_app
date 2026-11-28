@@ -73,6 +73,12 @@ export abstract class MainRepo<T> {
         return await this.model.findById(ID).setOptions(options);
     };
 
+    countDocuments = async (
+        filter: QueryFilter<T> = {}
+    ): Promise<number> => {
+        return await this.model.countDocuments(filter);
+    };
+
     findByIdAndUpdate = async (
         ID: string,
         data: Partial<T>,
@@ -90,6 +96,9 @@ export abstract class MainRepo<T> {
     };
     findOneAndDelete = async (filter:  QueryFilter<T> = {}):Promise<HydratedDocument<T> |undefined|null> => {
         return await this.model.findOneAndDelete(filter);
+    };
+    findOneAndUpdate = async (filter:  QueryFilter<T> = {},data: Partial<T>):Promise<HydratedDocument<T> |undefined|null> => {
+        return await this.model.findOneAndUpdate(filter,data);
     };
 
     find = async (
