@@ -8,7 +8,7 @@ import { HydratedDocument } from "mongoose";
 import { Iuser } from "../../common/interface/user.interfasce.js";
 import { uploadMiddleware } from "../../middleware/multer.middleware.js";
 import { fileTypeValidation, localFileUpload } from "../../common/utils/multer/local.multer.js";
-import { cloudInstance } from "../../common/service/cloud.service.js";
+import { cloudInstance } from "../../common/service/s3.service.js";
 import {pipeline}from"node:stream/promises"
 import { IFindOptions } from "../../common/interface/DBRepo.interface.js";
 import { Validation } from "../../middleware/validation.middleware.js";
@@ -150,6 +150,8 @@ router.post(
 
 router.patch(
     "/profile-image",
+    authentication(TOKEN_TYPE.access),
+    authorization([RoleEnum.admin, RoleEnum.user]),
     uploadMiddleware({
         multerMiddleware:localFileUpload({}).single("attachment"),
         validation:fileTypeValidation.image,
@@ -174,16 +176,62 @@ router.patch(
 router.get(
     "/profile-image/*path",
     Validation(profileImageSchema),
+    authentication(TOKEN_TYPE.access),
+    authorization([RoleEnum.admin, RoleEnum.user]),
     async(req:express.Request,res:express.Response,next:express.NextFunction)=>{
-    const key=(req.params.path as string[]).join("/")
-    const {download="false",filename=(req.params.path as string[]).pop()}=req.query as {download?:"true"|"false",filename?:string}
-    const data=await cloudInstance.getAsset({Key:key})
-    res.set("Cross-Origin-Resource-Policy","cross-origin")
-    if(download=="true")
-        res.setHeader("Content-Disposition",'attachment; filename="'+(filename || key.split("/").pop())+'"')
+        const key=(req.params.path as string[]).join("/")
+        const {download="false",filename=(req.params.path as string[]).pop()}=req.query as {download?:"true"|"false",filename?:string}
+        const data=await cloudInstance.getAsset({Key:key})
+        res.set("Cross-Origin-Resource-Policy","cross-origin")
+        if(download=="true")
+            res.setHeader("Content-Disposition",'attachment; filename="'+(filename || key.split("/").pop())+'"')
 
-    return await pipeline(data.Body as NodeJS.ReadableStream, res);
+        return await pipeline(data.Body as NodeJS.ReadableStream, res);
     }
+);
+
+router.post(
+    "/uploads/presigned-url",
+    authentication(TOKEN_TYPE.access),
+    authorization([RoleEnum.admin, RoleEnum.user]),
+    responseFormatter(
+        async (
+            req: express.Request,
+            res: express.Response,
+            next: express.NextFunction
+        ) => {
+            const {path,ContentType,fileName,expiresIn}=req.query as {path:string,ContentType:string,fileName:string,expiresIn?:string}
+            const data=await cloudInstance.createPreSignedUrl({path,ContentType,fileName,expiresIn:Number(expiresIn)})
+            return {
+                status: 200,
+                message: true,
+                data
+            };
+        }
+    )
+);
+
+router.get(
+    "/uploads/presigned-url/*path",
+    authentication(TOKEN_TYPE.access),
+    authorization([RoleEnum.admin, RoleEnum.user]),
+    responseFormatter(
+        async (
+            req: express.Request,
+            res: express.Response,
+            next: express.NextFunction
+        ) => {
+            const {expiresIn}=req.query as {expiresIn?:string}
+            const {path}=req.params as {path:string[]}
+            const Key=(path as string[]).join("/")
+            const data=await cloudInstance.getPreSignedUrl({Key,expiresIn:Number(expiresIn),download:req.query.download==="true"})
+            return {
+                status: 200,
+                message: true,
+                data
+            };
+        }
+    )
 );
 
 router.get(

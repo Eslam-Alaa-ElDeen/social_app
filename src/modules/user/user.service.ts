@@ -10,7 +10,7 @@ import {
 import { ACCESS_TOKEN_EXPIRES_IN } from "../../config/config.service.js";
 import { BadRequestException, ConflictException, NotFoundException } from "../../common/exception/app.exception.js";
 import { LogoutTypeEnum, ProfileStatus } from "../../common/utils/index.js";
-import { cloudInstance, CloudService } from "../../common/service/cloud.service.js";
+import { cloudInstance, CloudService } from "../../common/service/s3.service.js";
 import { IFindOptions } from "../../common/interface/DBRepo.interface.js";
 import { parseSort } from "../../common/utils/sort.js";
 import { FollowRepo } from "../../DB/repositories/follow.repo.js";
